@@ -4,7 +4,7 @@ var archiver = require('archiver');
 
 module.exports = s3Zip = {};
 
-s3Zip.archive = function (opts, folder, files) {
+s3Zip.archive = function (opts, folder, files, renameMap) {
   var self = this;
   var keyStream = s3Files
     .connect({
@@ -14,12 +14,13 @@ s3Zip.archive = function (opts, folder, files) {
     .createKeyStream(folder, files);
 
   var fileStream = s3Files.createFileStream(keyStream);
-  var archive = self.archiveStream(fileStream);
+  var archive = self.archiveStream(fileStream, renameMap);
   return archive;
 };
 
 
-s3Zip.archiveStream = function (stream) {
+s3Zip.archiveStream = function (stream, renameMap) {
+  renameMap = renameMap || {};
   var archive = archiver('zip');
   archive.on('error', function (err) {
     console.log('archive error', err);
@@ -30,7 +31,7 @@ s3Zip.archiveStream = function (stream) {
       // console.log(file.data.toString());
      console.log('append to zip', file.path);
      // archive.append(file, { name: 'x.png' });
-     archive.append(file.data, { name: file.path });
+     archive.append(file.data, { name: renameMap[file.path] || file.path });
    })
    .on('end', function () {
      console.log('end -> finalize');
