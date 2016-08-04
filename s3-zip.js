@@ -31,7 +31,7 @@ s3Zip.archiveStream = function (stream, renameMap) {
      // console.log(file.data.toString());
      // console.log('append to zip', file.path);
      // archive.append(file, { name: 'x.png' });
-     archive.append(file.data, { name: renameMap[file.path] || file.path });
+     archive.append(file.data.length ? file.data : '', { name: renameMap[file.path] || file.path });
    })
    .on('end', function () {
      // console.log('end -> finalize');
